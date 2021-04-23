@@ -21,11 +21,10 @@ class Page {
 	// a partir de $default aplicando los parametros de $opts
 	$this -> options = array_merge($this->defaults, $opts);
 		
-	console.log($_SERVER["DOCUMENT_ROOT"]);
 	// config
 	$config = array(
-					"tpl_dir"       	=> $_SERVER["DOCUMENT_ROOT"]."views/",
-					"cache_dir"     => $_SERVER["DOCUMENT_ROOT"]."views-cache/",
+					"tpl_dir"       	=> $_SERVER["DOCUMENT_ROOT"]."/views/",
+					"cache_dir"     => $_SERVER["DOCUMENT_ROOT"]."/views-cache/",
 					"debug"         	=> false // set to false to improve the speed
 	 );
 
@@ -67,7 +66,7 @@ class Page {
 		
 		$this->setData($data);
 		
-		return $this->tpl->drw($name, $returnHTML);
+		return $this->tpl->draw($name, $returnHTML);
 		
 	}
 	
