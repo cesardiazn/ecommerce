@@ -14,8 +14,12 @@ class Page {
 		"data"=>[]
 		]; // define los atributos por defecto
 	
-	// $opts son los atributos pasados al llamar a la funcion
-	public function __construct($opts = array()){
+	/*
+	$opts son los atributos pasados al llamar a la funcion
+	se define $tpl_dir para poder utilizar el mismo metodo con otra clase, que usa otro directorio
+	se asigna por defecto el valor /view/
+	*/
+	public function __construct($opts = array(), $tpl_dir = "/views/"){
 		
 	// usamos array_merge para definir el atributo ( options )
 	// a partir de $default aplicando los parametros de $opts
@@ -23,7 +27,7 @@ class Page {
 		
 	// config
 	$config = array(
-					"tpl_dir"       	=> $_SERVER["DOCUMENT_ROOT"]."/views/",
+					"tpl_dir"       	=> $_SERVER["DOCUMENT_ROOT"].$tpl_dir,
 					"cache_dir"     => $_SERVER["DOCUMENT_ROOT"]."/views-cache/",
 					"debug"         	=> false // set to false to improve the speed
 	 );
