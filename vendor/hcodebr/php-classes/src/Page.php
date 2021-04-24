@@ -11,6 +11,8 @@ class Page {
 	private $tpl;
 	private $options = []; // define los atributos a utilizar
 	private $defaults = [
+		"header"=>true,
+		"footer"=>true,
 		"data"=>[]
 		]; // define los atributos por defecto
 	
@@ -40,7 +42,7 @@ class Page {
 	$this->setData($this->options["data"]);
 	
 	// usamos el metodo draw para definir la cabecera de pag que se va a mostrar
-	$this->tpl->draw("header");
+	if ($this->options["header"] === true) $this->tpl->draw("header");
 		
 	}
 	
@@ -76,7 +78,7 @@ class Page {
 	
 	public function __destruct(){
 		
-		$this->tpl->draw("footer");
+		if ($this->options["footer"] === true) $this->tpl->draw("footer");
 	}
 }
 
