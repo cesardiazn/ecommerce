@@ -4,10 +4,14 @@ namespace Hcode\Model;
 
 use \Hcode\DB\Sql;
 use \Hcode\Model;
+use \Hcode\Mailer;
 
 class User extends Model {
 	
 	const SESSION = "User";
+	// Se altero las constantes de encriptacion, para usar OpenSSL
+	const SECRET =  "HcodePhp7_Secret";
+	const SECRET_IV = "HcodePhp7_SecreT";
 	
 	public static function login($Login, $password) {
 		
@@ -167,4 +171,130 @@ class User extends Model {
 			":iduser"=>$this->getiduser()
 			));
 	}
+	
+	
+	public static function getForgot($email){
+			// Vamos a hacer una consulta a la DB para verificar si tenemos un usuario con el email indicado
+			$sql = new Sql();
+			
+			$results = $sql->select("
+				SELECT *
+				FROM tb_persons a
+				INNER JOIN tb_users b USING(idperson)
+				WHERE a.desemail = :email;",
+				array(
+					":email"=>$email
+				));
+				
+				if (count($results) === 0 ){
+					throw new \Exception("Não foi possível recuperar a senha.");
+				} else {
+					
+					$data = $results[0];
+					$results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array (
+						":iduser"=>$data["iduser"],
+						":desip"=>$_SERVER["REMOTE_ADDR"]
+					));
+					
+					if (count($results2) === 0 ) {
+						throw new \Exception("Não foi possível recuperar a senha.");
+					} else {
+						$dataRecovery = $results2[0];
+						
+						/*
+						**************** mcrypt_encrypt **********
+						ESTA OBSOLETO
+						vamos a generar un codigo encriptado, y codificado para envio html
+						parametros 
+						key = constante secret (clave de encriptacion)
+						data = 
+						mode = Modo de encriptacion, en este caso se selecciono MCRYPT_MODE_ECB
+						
+						$code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
+						
+						*/
+						//echo "<script>console.log('codidrecovery 1 :".$dataRecovery["idrecovery"]."');</script>";
+						$code = openssl_encrypt(
+							// json_encode($dataRecovery["idrecovery"]),
+							$dataRecovery["idrecovery"],
+							'AES-128-CBC',
+							User::SECRET,
+							0,
+							User::SECRET_IV
+							);
+						// echo "<script>console.log('code 1 :".$code."');</script>";
+						// el link para recuperación del password queda 
+						$link = "http://www.hcodecommerce.com.br/admin/forgot/reset?code=$code";
+						// se envia por email el link 
+						
+						$mailer = new Mailer($data["desemail"],$data["desperson"],"Redefinir Senha da Hcode Store","forgot", array(
+							"name"=>$data["desperson"],
+							"link"=>$link
+						));
+						$mailer->send();
+						
+						return $data;
+					}
+				}
+	}
+
+
+	public static function validForgotDecrypt($code){
+
+		// echo "<script>console.log('code :".$code."');</script>";
+		// $string = openssl_decrypt($openssl, 'AES-128-CBC', SECRET, 0, SECRET_IV);
+		$idrecovery = openssl_decrypt($code, 'AES-128-CBC', User::SECRET, 0, User::SECRET_IV);
+
+		//var_dump($idrecovery);
+		//echo "<script>console.log('idrecovery :".$idrecovery."');</script>";
+		// echo "<br><br>";
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+		SELECT *
+		FROM tb_userspasswordsrecoveries a
+		INNER JOIN tb_users b USING(iduser)
+		INNER JOIN tb_persons c USING(idperson)
+		WHERE
+			a.idrecovery = :idrecovery
+			AND
+			a.dtrecovery IS NULL
+			AND
+			DATE_ADD(a.dtregister, INTERVAL 1 HOUR) >= NOW();
+		", array(
+			":idrecovery"=>$idrecovery
+		));
+		//var_dump($results);
+		//echo "<script>console.log('consulta :'".json_encode($results)."');</script>";
+
+		if (count($results)===0){
+			throw new \Exception("Não foi possível recuperar a senha.", 1);
+		} else {
+			return $results[0];
+		}
+		
+	}
+
+
+	public static function setForgotUsed($idrecovery){
+
+		$sql = new Sql();
+
+		$sql->query("UPDATE tb_userspasswordsrecoveries SET dtrecovery = NOW() WHERE idrecovery = :idrecovery", array(
+			":idrecovery"=>$idrecovery
+		));
+	}
+
+
+	public function setPassword($password){
+
+		$sql = new Sql();
+
+		$sql->query("UPDATE tb_users SET despassword = :password WHERE iduser = :iduser", Array(
+			":password"=>$password,
+			"iduser"=>$this->getiduser()
+		));
+	}
+
 }
