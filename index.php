@@ -5,6 +5,7 @@ session_start();
 require_once("vendor/autoload.php");
 
 // name space
+use \Slim\Slim;
 use \Hcode\Page;
 use \Hcode\PageAdmin;
 use \Hcode\Model\User;
@@ -12,7 +13,6 @@ use \Hcode\Model\Category;
 
 
 // $app = new \Slim\Slim();
-use \Slim\Slim;
 $app = new Slim();
 
 $app->config('debug', true);
@@ -354,6 +354,26 @@ $app->post("/admin/categories/:idcategory", function($idcategory){
 
 });
 
+
+
+$app->get("/categories/:idcategory", function($idcategory){
+
+	$category = new Category();
+
+	$category->get((int)$idcategory);
+
+	$page = new Page();
+
+	/*$ccc=$category->getValues();
+	var_dump($ccc);
+	exit;
+	*/
+	$page->setTpl("category", [
+		'category'=>$category->getValues(),
+		'products'=>[] // este array vacio se usa temporalmente para que la pag no de error en el loop
+	]);
+	//exit;
+});
 
 
 $app->run();

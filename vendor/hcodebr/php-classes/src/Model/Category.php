@@ -28,6 +28,8 @@ class Category extends Model {
 		));
 		
 		$this->setData($results[0]);
+
+		Category::updateFile();
 	}
 
 
@@ -52,5 +54,33 @@ class Category extends Model {
 		$sql->query("DELETE FROM tb_categories WHERE idcategory = :idcategory", [
 			':idcategory'=>$this->getidcategory()
 		]);
+
+		Category::updateFile();
+	}
+
+
+	/*
+	Metodo para Actualizar un archivo HTML que va a contener las categorias
+	el archivo será actualizado cada vez que se haga alguna actualización de las categorias
+	*/
+	public static function updateFile() {
+
+		$categories = Category::listAll();
+
+		// definimos un array para guardar los registros (categorias) ya con el formato html 
+		$html = [];
+
+		// cargamos el array con la informacion
+		foreach ($categories as $row) {
+			// href va a contener el link (ruta de la categoria), a partir del id correspondiente
+			array_push($html, '<li><a href="/categories/'.$row['idcategory'].'">'.$row['descategory'].'</a></li>');
+		}
+
+		/*
+		 grabamos el archivo html con el contenido del array,
+		 indicamos la ruta a partir de la ruta principal, usando las variables de separador
+		 y por ultimo convertimos el array en string.
+		 */
+		file_put_contents($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR . "categories-menu.html", implode('', $html));
 	}
 }
