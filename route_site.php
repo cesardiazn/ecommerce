@@ -2,16 +2,20 @@
 
 use \Hcode\Page;
 use \Hcode\Model\Category;
+use \Hcode\Model\Product;
 
-$app->get('/', function() {
+
+$app->get('/', function(){
+
+	$products = Product::listAll();
 
 	// al definir la instancia, automaticamente llama al __contructor  y al __destruct
 	$page = new Page();
-	
-	$page->setTpl("index");
 
+	$page->setTpl("index", [
+		'products'=>Product::checkList($products)
+	]);
 });
-
 
 
 $app->get("/categories/:idcategory", function($idcategory){
@@ -32,6 +36,7 @@ $app->get("/categories/:idcategory", function($idcategory){
 	]);
 	//exit;
 });
+
 
 
 ?>

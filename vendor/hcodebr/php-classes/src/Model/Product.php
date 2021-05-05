@@ -16,6 +16,33 @@ class Product extends Model {
 	}
 	
 
+	public static function checkList($list) {
+		
+		/* Por cada elemento del array ($list) se va a pasar el valor a $row
+		se ejecutan las sentencias y se pasa al siguiente elemento y $row toma el valor
+		del siguiente elemento hasta recorrer el array.
+		al colocar el & en el $row, permite que alteremos el valor contenido en dicho elemento
+		y se reflejado en el array ($list)
+
+		$list es una array que contiene la lista de productos y sus correspondientes datos
+		pero le falta el url de la imagen asociada al producto
+
+		siendo solo el url de la imagen el dato faltante, y siendo que el nombre es dado a partir del id del producto
+		se podria crear un foreach donde se agregara dicho url a partir de los datos conocidos...
+		*/
+		foreach ($list as &$row){
+			// creamos una instancia de producto
+			$p = new Product();
+			// asignamos los datos del producto en la instancia
+			$p->setData($row);
+			// obtenemos todos los datos del producto y se lo asignamos a $row que a su vez va a afectar a $list
+			$row = $p->getvalues();
+		}
+
+		return $list;
+	}
+
+
 	public function save() {
 		
 		$sql = new Sql();

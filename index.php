@@ -17,6 +17,7 @@ $app = new Slim();
 $app->config('debug', true);
 
 
+require_once("functions.php");
 /*
 Comenzamos a definir las rutas de acceso
 para facilitar el mantenimiento las distribuimos en diferentes archivos, de forma clasificada
