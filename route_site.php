@@ -32,7 +32,7 @@ $app->get("/categories/:idcategory", function($idcategory){
 	*/
 	$page->setTpl("category", [
 		'category'=>$category->getValues(),
-		'products'=>[] // este array vacio se usa temporalmente para que la pag no de error en el loop
+		'products'=>Product::checkList($category->getProducts())
 	]);
 	//exit;
 });
