@@ -121,7 +121,7 @@ class Category extends Model {
 	Esta funcion va a traer los productos por paginas 
 	recibe los parametros pagina ($page) y la cantidad de productos x pag ($itemsPerPage)
 	*/
-	public function getProductsPage($page=1, $itemsPerPage=3){
+	public function getProductsPage($page=1, $itemsPerPage=4){
 
 		$start = ($page - 1) * $itemsPerPage;
 
@@ -143,7 +143,7 @@ class Category extends Model {
 		return [
 			'data'=>Product::checkList($results),
 			'total'=>(int)$resultTotal[0]["nrtotal"],
-			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage)
+			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage),
 		];
 
 	}

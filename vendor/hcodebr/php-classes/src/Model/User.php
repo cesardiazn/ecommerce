@@ -12,7 +12,57 @@ class User extends Model {
 	// Se altero las constantes de encriptacion, para usar OpenSSL
 	const SECRET =  "HcodePhp7_Secret";
 	const SECRET_IV = "HcodePhp7_SecreT";
+
+
+	public static function getFromSession(){
+
+		$user = new User();
+
+		if (isset($_SESSION[User::SESSION]) && (int)$_SESSION[User::SESSION]['iduser'] >0) {
+
+			$user->setData($_SESSION[User::SESSION]);
+
+		}
+
+		return $user;
+	}
 	
+
+	// verifica si un usuario esta logado. $inadmin indica si es un usuario administrador
+	public static function checkLogin($inadmin = true) {
+
+				if (
+					// si la variable de session con el nombre del usuario no existe 
+					!isset($_SESSION[User::SESSION])
+					||
+					// o no tiene valor  
+					!$_SESSION[User::SESSION]
+					||
+					// o el id(user) no es mayor que 0
+					!(Int)$_SESSION[User::SESSION]["iduser"] >0
+				) {
+					// no esta logado
+					return false;
+				} else { 
+					// el usuario esta logado
+					// verifico si es un administrador que esta accesando un rota administracion
+					// la session existe y es un usuario administrador
+					if ($inadmin === true && (bool)$_SESSION[USER::SESSION]['inadmin']===true){
+						return true;
+					} else if ($inadmin === false) {
+						// es un usuario administracion que esta accesando como usuario, esta usando el carrito
+						return true;
+					} else {
+						// no esta logado
+						return false;
+					}
+
+				}
+		
+	}
+
+
+
 	public static function login($Login, $password) {
 		
 		$sql = new Sql();
@@ -68,19 +118,7 @@ class User extends Model {
 	public static function verifyLogin($inadmin = true){
 		
 		
-		if (
-			// si la variable de session con el nombre del usuario no existe 
-			!isset($_SESSION[User::SESSION])
-			||
-			// o no tiene valor  
-			!$_SESSION[User::SESSION]
-			||
-			// o el id(user) no es mayor que 0
-			!(Int)$_SESSION[User::SESSION]["iduser"] >0
-			||
-			// o el valor de inadmin de la sesion es diferente el valor de $inadmin
-			(bool)$_SESSION[User::SESSION]["inadmin"] !== $inadmin 
-			) {
+		if (User::checkLogin($inadmin)) {
 				
 				// si la verificacion de la sesion del usuario no es valida, reenvio al usuario al login
 				header("Location: /admin/login");
